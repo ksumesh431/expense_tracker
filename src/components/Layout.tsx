@@ -29,7 +29,7 @@ export default function Layout({ year, onYearChange }: LayoutProps) {
     const [collapsed, setCollapsed] = useState(false);
 
     return (
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex h-[100dvh] overflow-hidden">
             {/* ── Sidebar ──────────────────────────────────────── */}
             <aside
                 className={cn(
