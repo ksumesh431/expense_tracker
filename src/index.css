@@ -69,6 +69,7 @@
 
 html {
   color-scheme: dark;
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -79,6 +80,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px;
   line-height: 1.5;
+  overscroll-behavior-y: none;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────── */

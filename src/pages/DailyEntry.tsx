@@ -139,11 +139,12 @@ export default function MonthlyEntry({ year }: MonthlyEntryProps) {
                             isToday ? "text-accent" : "text-text-muted"
                           )}
                           style={{
-                            backgroundColor: isToday
-                              ? "var(--color-grid-today)"
+                            backgroundColor: "var(--color-bg-card)",
+                            backgroundImage: isToday
+                              ? "linear-gradient(var(--color-grid-today), var(--color-grid-today))"
                               : day % 2 === 0
-                                ? "rgba(255,255,255,0.015)"
-                                : "var(--color-bg-card)",
+                                ? "linear-gradient(var(--color-grid-row-even), var(--color-grid-row-even))"
+                                : "none",
                             borderColor: "var(--color-grid-border)",
                             height: "30px",
                           }}

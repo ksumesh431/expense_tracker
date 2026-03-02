@@ -144,11 +144,14 @@ function SummaryRow({ row, index, maxVal }: SummaryRowProps) {
     return (
         <tr className={cn(
             "border-b border-border-subtle transition-colors hover:bg-bg-hover",
-            index % 2 === 0 && "grid-row-alt"
+            index % 2 === 0 && "grid-row-even"
         )}>
             <td
                 className="sticky left-0 z-10 px-3 py-2 text-sm font-medium text-text-primary border-r border-border-subtle"
-                style={{ backgroundColor: index % 2 === 0 ? "var(--color-grid-row-alt)" : "var(--color-bg-card)" }}
+                style={{
+                    backgroundColor: "var(--color-bg-card)",
+                    backgroundImage: index % 2 === 0 ? "linear-gradient(var(--color-grid-row-even), var(--color-grid-row-even))" : "none"
+                }}
             >
                 {row.category}
             </td>
