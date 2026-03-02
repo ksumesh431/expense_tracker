@@ -94,7 +94,7 @@ export default function Summary({ year }: SummaryProps) {
                                         {m}
                                     </th>
                                 ))}
-                                <th className="px-3 py-2.5 text-right text-xs font-semibold text-accent uppercase tracking-wider border-b border-border-subtle border-l border-border-subtle"
+                                <th className="px-3 py-2.5 text-right text-xs font-semibold text-accent uppercase tracking-wider border-b border-border-subtle border-l-2 border-l-accent/30"
                                     style={{ minWidth: "85px" }}>
                                     Total
                                 </th>
@@ -120,7 +120,7 @@ export default function Summary({ year }: SummaryProps) {
                                         {total > 0 ? formatNumber(total) : "-"}
                                     </td>
                                 ))}
-                                <td className="px-3 py-3 text-right text-sm font-extrabold text-accent border-t-2 border-accent border-l border-border-subtle tabular-nums">
+                                <td className="px-3 py-3 text-right text-sm font-extrabold text-accent border-t-2 border-accent border-l-2 border-l-accent/50 tabular-nums">
                                     {formatNumber(grandTotal)}
                                 </td>
                             </tr>
@@ -166,7 +166,7 @@ function SummaryRow({ row, index, maxVal }: SummaryRowProps) {
                     {val > 0 ? formatNumber(val) : "-"}
                 </td>
             ))}
-            <td className="px-3 py-2 text-right text-sm font-semibold text-text-heading border-l border-border-subtle tabular-nums">
+            <td className="px-3 py-2 text-right text-sm font-semibold text-text-heading border-l-2 border-l-border tabular-nums bg-[var(--color-bg-primary)]/10">
                 {row.total > 0 ? formatNumber(row.total) : "-"}
             </td>
         </tr>
