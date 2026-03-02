@@ -1,73 +1,68 @@
 # ============================================================
 # CircleCI — Build & Push Docker Image to Docker Hub
 # ============================================================
-# Triggers on push to main branch.
-# Builds a multi-arch image (amd64 + arm64) and pushes to Docker Hub.
+# Single-job pipeline using machine executor + QEMU for
+# multi-arch builds (free-plan compatible).
+#
+# Optimizations:
+#   • Docker Layer Caching (DLC) for faster rebuilds
+#   • Buildx with docker-container driver for multi-arch
+#   • QEMU for arm64 cross-compilation on amd64 runner
+#   • Short SHA + latest tags for versioning
 #
 # Required CircleCI Environment Variables (Project Settings → Environment Variables):
 #   DOCKERHUB_USERNAME       — Your Docker Hub username
-#   DOCKERHUB_TOKEN          — Docker Hub access token (Read & Write)
+#   DOCKERHUB_TOKEN          — Docker Hub access token (Read, Write, Delete)
 #   VITE_SUPABASE_URL        — Supabase project URL
 #   VITE_SUPABASE_ANON_KEY   — Supabase anonymous key
-#   DOCKER_IMAGE_NAME        — e.g. "expense-tracker" (optional, defaults to expense-tracker)
 # ============================================================
 
 version: 2.1
 
 jobs:
   build-and-push:
-    docker:
-      - image: cimg/base:current
+    machine:
+      image: ubuntu-2404:current
+      docker_layer_caching: true
     resource_class: medium
     steps:
       - checkout
 
-      - setup_remote_docker:
-          version: "20.10.24"
-          docker_layer_caching: true
+      - run:
+          name: Set up QEMU for multi-arch
+          command: docker run --rm --privileged tonistiigi/binfmt --install all
 
-      # Install buildx for multi-arch builds
       - run:
           name: Set up Docker Buildx
           command: |
-            mkdir -p ~/.docker/cli-plugins
-            curl -sSL https://github.com/docker/buildx/releases/latest/download/buildx-v0.19.3.linux-amd64 \
-              -o ~/.docker/cli-plugins/docker-buildx
-            chmod +x ~/.docker/cli-plugins/docker-buildx
-            docker buildx create --name multiarch --use
+            docker buildx create --name multiarch --driver docker-container --use
             docker buildx inspect --bootstrap
-
-      # Install QEMU for arm64 cross-compilation
-      - run:
-          name: Set up QEMU
-          command: |
-            docker run --rm --privileged tonistiigi/binfmt --install all
 
       - run:
           name: Login to Docker Hub
-          command: |
-            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          command: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
       - run:
-          name: Build and Push Multi-Arch Image
+          name: Build and push multi-arch image
+          no_output_timeout: 20m
           command: |
-            IMAGE_NAME="${DOCKER_IMAGE_NAME:-expense-tracker}"
             SHORT_SHA=$(echo "$CIRCLE_SHA1" | cut -c1-7)
+            IMAGE="$DOCKERHUB_USERNAME/expense-tracker"
 
             docker buildx build \
               --platform linux/amd64,linux/arm64 \
               --build-arg VITE_SUPABASE_URL="$VITE_SUPABASE_URL" \
               --build-arg VITE_SUPABASE_ANON_KEY="$VITE_SUPABASE_ANON_KEY" \
-              --tag "$DOCKERHUB_USERNAME/$IMAGE_NAME:latest" \
-              --tag "$DOCKERHUB_USERNAME/$IMAGE_NAME:$SHORT_SHA" \
+              --tag "$IMAGE:latest" \
+              --tag "$IMAGE:$SHORT_SHA" \
               --push \
               .
 
       - run:
           name: Verify pushed image
           command: |
-            IMAGE_NAME="${DOCKER_IMAGE_NAME:-expense-tracker}"
-            docker buildx imagetools inspect "$DOCKERHUB_USERNAME/$IMAGE_NAME:latest"
+            IMAGE="$DOCKERHUB_USERNAME/expense-tracker"
+            docker buildx imagetools inspect "$IMAGE:latest"
 
 workflows:
   build-deploy:
