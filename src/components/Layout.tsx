@@ -82,7 +82,7 @@ export default function Layout({ year, onYearChange }: LayoutProps) {
             </aside>
 
             {/* ── Main Area ────────────────────────────────────── */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 min-h-0">
                 {/* Top Bar */}
                 <header
                     className="flex items-center justify-between px-6 h-[var(--topbar-height)] border-b border-border flex-shrink-0"
@@ -118,31 +118,34 @@ export default function Layout({ year, onYearChange }: LayoutProps) {
                     </div>
                 </header>
 
-                {/* Page Content */}
-                <main className="flex-1 overflow-auto p-6" style={{ backgroundColor: "var(--color-bg-primary)" }}>
-                    <Outlet />
-                </main>
+                {/* Scrollable wrapper for content + sticky nav */}
+                <div className="flex-1 overflow-auto" style={{ backgroundColor: "var(--color-bg-primary)" }}>
+                    {/* Page Content */}
+                    <main className="p-6">
+                        <Outlet />
+                    </main>
 
-                {/* ── Mobile Bottom Nav (in-flow, not fixed) ──────── */}
-                <nav className="md:hidden flex border-t border-border flex-shrink-0"
-                    style={{ backgroundColor: "var(--color-sidebar-bg)" }}>
-                    {NAV_ITEMS.map((item) => (
-                        <NavLink
-                            key={item.to}
-                            to={item.to}
-                            end={item.to === "/"}
-                            className={({ isActive }) =>
-                                cn(
-                                    "flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors",
-                                    isActive ? "text-accent" : "text-text-muted hover:text-text-secondary"
-                                )
-                            }
-                        >
-                            {item.icon}
-                            <span>{item.label}</span>
-                        </NavLink>
-                    ))}
-                </nav>
+                    {/* ── Mobile Bottom Nav (sticky to viewport bottom) ── */}
+                    <nav className="md:hidden flex border-t border-border sticky bottom-0 z-20"
+                        style={{ backgroundColor: "var(--color-sidebar-bg)" }}>
+                        {NAV_ITEMS.map((item) => (
+                            <NavLink
+                                key={item.to}
+                                to={item.to}
+                                end={item.to === "/"}
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors",
+                                        isActive ? "text-accent" : "text-text-muted hover:text-text-secondary"
+                                    )
+                                }
+                            >
+                                {item.icon}
+                                <span>{item.label}</span>
+                            </NavLink>
+                        ))}
+                    </nav>
+                </div>
             </div>
         </div>
     );
