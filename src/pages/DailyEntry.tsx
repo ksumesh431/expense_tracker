@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useRef, memo } from "react";
 import { useMonthlyGrid } from "../lib/useMonthlyGrid";
-import { CATEGORIES, MONTH_SHORT, CURRENT_MONTH } from "../lib/constants";
+import { CATEGORIES, MONTH_SHORT, CURRENT_MONTH, REMARKS_CATEGORY } from "../lib/constants";
 import { getDaysInMonth, formatNumber, cn } from "../lib/utils";
 import { Loader2 } from "lucide-react";
 
@@ -32,7 +32,7 @@ function shortLabel(cat: string): string {
 
 export default function MonthlyEntry({ year }: MonthlyEntryProps) {
   const [month, setMonth] = useState(CURRENT_MONTH);
-  const { grid, loading, error, updateCell, columnTotals, grandTotal } = useMonthlyGrid(year, month);
+  const { grid, loading, error, updateCell, updateRemark, columnTotals, grandTotal } = useMonthlyGrid(year, month);
 
   const days = getDaysInMonth(year, month);
   const today = new Date();
@@ -91,6 +91,9 @@ export default function MonthlyEntry({ year }: MonthlyEntryProps) {
                 <th className="px-3 py-2 text-right text-[11px] font-bold text-accent tracking-wider border-b border-border border-l border-border w-[72px]">
                   Day Total
                 </th>
+                <th className="px-3 py-2 text-left text-[11px] font-semibold text-text-secondary tracking-wider border-b border-border border-l border-border w-[120px]">
+                  Remarks
+                </th>
               </tr>
             </thead>
 
@@ -98,7 +101,7 @@ export default function MonthlyEntry({ year }: MonthlyEntryProps) {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={CATEGORIES.length + 2} className="py-16 text-center text-text-muted text-sm">
+                  <td colSpan={CATEGORIES.length + 3} className="py-16 text-center text-text-muted text-sm">
                     <Loader2 className="inline animate-spin mr-2" size={16} />
                     Loading...
                   </td>
@@ -170,6 +173,13 @@ export default function MonthlyEntry({ year }: MonthlyEntryProps) {
                         >
                           {rowTotal > 0 ? formatNumber(rowTotal) : ""}
                         </td>
+
+                        {/* Remarks */}
+                        <EditableRemarkCell
+                          day={day}
+                          remarks={dayData[REMARKS_CATEGORY]?.remarks ?? null}
+                          onUpdate={updateRemark}
+                        />
                       </tr>
                     );
                   })}
@@ -191,6 +201,9 @@ export default function MonthlyEntry({ year }: MonthlyEntryProps) {
                     <td className="px-2 py-2.5 text-right text-xs font-extrabold text-accent border-t-2 border-accent border-l tabular-nums"
                       style={{ borderLeftColor: "var(--color-grid-border)" }}>
                       {grandTotal > 0 ? formatNumber(grandTotal) : "0"}
+                    </td>
+                    <td className="px-3 py-2.5 border-t-2 border-accent border-l border-border bg-[var(--color-grid-header)]">
+                      {/* Empty cell for Remarks total column */}
                     </td>
                   </tr>
                 </>
@@ -285,6 +298,82 @@ const EditableCell = memo(function EditableCell({
           amount && amount > 0 ? "amount-positive" : ""
         )}>
           {amount !== null && amount > 0 ? formatNumber(amount) : ""}
+        </span>
+      )}
+    </td>
+  );
+});
+
+// ── Editable Remark Cell ──────────────────────────────────────
+
+interface EditableRemarkCellProps {
+  day: number;
+  remarks: string | null;
+  onUpdate: (day: number, remarks: string) => void;
+}
+
+const EditableRemarkCell = memo(function EditableRemarkCell({
+  day,
+  remarks,
+  onUpdate,
+}: EditableRemarkCellProps) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const startEditing = useCallback(() => {
+    setValue(remarks ?? "");
+    setEditing(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }, [remarks]);
+
+  const commit = useCallback(() => {
+    setEditing(false);
+    const newVal = value.trim();
+    if (newVal === (remarks ?? "")) return;
+    onUpdate(day, newVal);
+  }, [value, remarks, day, onUpdate]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        commit();
+        // Remarks is the last column, so Tab goes to the next row's first column (Day 1 cell)
+        const parent = (e.currentTarget as HTMLElement).parentElement;
+        const nextRow = parent?.parentElement?.nextElementSibling;
+        if (nextRow) {
+          const firstEditCell = nextRow.children[1] as HTMLElement; // children[0] is the Day label, [1] is first cat
+          if (firstEditCell) firstEditCell.click();
+        }
+      } else if (e.key === "Escape") {
+        setEditing(false);
+      }
+    },
+    [commit]
+  );
+
+  return (
+    <td
+      className="grid-cell px-0 py-0 text-left text-xs border-l"
+      style={{ borderColor: "var(--color-grid-border)", height: "30px", maxWidth: "200px" }}
+      onClick={!editing ? startEditing : undefined}
+      title={remarks ?? ""}
+    >
+      {editing ? (
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={commit}
+          onKeyDown={handleKeyDown}
+          className="h-full w-full text-xs px-2 bg-[var(--color-bg-hover)] text-text-primary"
+          placeholder="Add remark..."
+        />
+      ) : (
+        <span className="block px-2 h-full flex items-center text-xs text-text-muted truncate">
+          {remarks ?? ""}
         </span>
       )}
     </td>

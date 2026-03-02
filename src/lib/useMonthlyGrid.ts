@@ -17,7 +17,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import type { MonthlyGrid, GridCell } from "../types";
-import { CATEGORIES } from "./constants";
+import { CATEGORIES, REMARKS_CATEGORY } from "./constants";
 import { getDaysInMonth, toDateString, buildMonthlyGrid } from "./utils";
 
 interface UseMonthlyGridResult {
@@ -26,6 +26,8 @@ interface UseMonthlyGridResult {
     error: string | null;
     /** Optimistic cell update — updates UI immediately, syncs DB in background */
     updateCell: (day: number, category: string, amount: number | null) => void;
+    /** Optimistic string update for day-level remarks */
+    updateRemark: (day: number, remarks: string) => void;
     /** Column totals derived from current grid state */
     columnTotals: Record<string, number>;
     /** Grand total across all categories */
@@ -132,6 +134,60 @@ export function useMonthlyGrid(year: number, month: number): UseMonthlyGridResul
         [grid]
     );
 
+    // ── Optimistic remark update ─────────────────────────────
+
+    const updateRemark = useCallback(
+        (day: number, remarks: string) => {
+            const capturedYear = activeMonth.current.year;
+            const capturedMonth = activeMonth.current.month;
+            const category = REMARKS_CATEGORY;
+            const trimmed = remarks.trim();
+
+            const oldCell: GridCell = grid[day]?.[category]
+                ? { ...grid[day][category] }
+                : { id: null, amount: null, remarks: null };
+
+            if ((oldCell.remarks ?? "") === trimmed) return;
+
+            // Optimistic update
+            setGrid((prev) => {
+                const next = { ...prev };
+                next[day] = { ...next[day] };
+                next[day][category] = {
+                    ...next[day][category],
+                    remarks: trimmed === "" ? null : trimmed,
+                };
+                return next;
+            });
+
+            const dateStr = toDateString(capturedYear, capturedMonth, day);
+
+            if (trimmed === "") {
+                // Delete if empty
+                supabase
+                    .from("expenses")
+                    .delete()
+                    .eq("expense_date", dateStr)
+                    .eq("category", category)
+                    .then(({ error: dbError }) => {
+                        if (dbError) rollback(day, category, oldCell);
+                    });
+            } else {
+                // Upsert with amount 0
+                supabase
+                    .from("expenses")
+                    .upsert(
+                        { expense_date: dateStr, category, amount: 0, remarks: trimmed },
+                        { onConflict: "expense_date,category" }
+                    )
+                    .then(({ error: dbError }) => {
+                        if (dbError) rollback(day, category, oldCell);
+                    });
+            }
+        },
+        [grid]
+    );
+
     // ── Rollback on error ────────────────────────────────────
 
     const rollback = useCallback(
@@ -169,5 +225,5 @@ export function useMonthlyGrid(year: number, month: number): UseMonthlyGridResul
         [columnTotals]
     );
 
-    return { grid, loading, error, updateCell, columnTotals, grandTotal };
+    return { grid, loading, error, updateCell, updateRemark, columnTotals, grandTotal };
 }

@@ -6,7 +6,7 @@
 // ============================================================
 
 import type { Expense, MonthlyGrid, GridCell, AnnualCategoryRow, DashboardStats, CategoryTotal } from "../types";
-import { CATEGORIES, CURRENCY_LOCALE, CURRENCY_CODE } from "./constants";
+import { CATEGORIES, CURRENCY_LOCALE, CURRENCY_CODE, REMARKS_CATEGORY } from "./constants";
 
 // ── Date Helpers ──────────────────────────────────────────────
 
@@ -73,6 +73,7 @@ export function buildMonthlyGrid(expenses: Expense[], year: number, month: numbe
         for (const cat of CATEGORIES) {
             grid[d][cat] = { ...EMPTY_CELL };
         }
+        grid[d][REMARKS_CATEGORY] = { ...EMPTY_CELL };
     }
 
     // Fill in actual data

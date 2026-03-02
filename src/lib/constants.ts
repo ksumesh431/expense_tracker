@@ -38,10 +38,9 @@ export const MONTH_NAMES = [
 ] as const;
 
 /** Short month names for tab labels */
-export const MONTH_SHORT = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-] as const;
+export const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export const REMARKS_CATEGORY = "__REMARKS__";
 
 /** Current date defaults */
 export const CURRENT_YEAR = new Date().getFullYear();
