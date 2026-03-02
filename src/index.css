@@ -72,6 +72,13 @@ html {
   overscroll-behavior-y: none;
 }
 
+/* Auto-scale for Desktop displays */
+@media (min-width: 1024px) {
+  html {
+    zoom: 1.25;
+  }
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-bg-primary);
