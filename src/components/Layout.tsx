@@ -119,15 +119,15 @@ export default function Layout({ year, onYearChange }: LayoutProps) {
                 </header>
 
                 {/* Scrollable wrapper for content + sticky nav */}
-                <div className="flex-1 overflow-auto" style={{ backgroundColor: "var(--color-bg-primary)" }}>
+                <div className="flex-1 overflow-auto flex flex-col" style={{ backgroundColor: "var(--color-bg-primary)" }}>
                     {/* Page Content */}
-                    <main className="p-6">
+                    <main className="p-6 flex-1 flex-shrink-0">
                         <Outlet />
                     </main>
 
                     {/* ── Mobile Bottom Nav (sticky to viewport bottom) ── */}
-                    <nav className="md:hidden flex border-t border-border sticky bottom-0 z-20"
-                        style={{ backgroundColor: "var(--color-sidebar-bg)" }}>
+                    <nav className="md:hidden flex border-t border-border sticky bottom-0 z-20 flex-shrink-0"
+                        style={{ backgroundColor: "var(--color-sidebar-bg)", paddingBottom: "env(safe-area-inset-bottom)" }}>
                         {NAV_ITEMS.map((item) => (
                             <NavLink
                                 key={item.to}
