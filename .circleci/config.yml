@@ -22,7 +22,7 @@ version: 2.1
 jobs:
   build-and-push:
     machine:
-      image: ubuntu-2404:current
+      image: ubuntu-2204:current
       docker_layer_caching: true
     resource_class: medium
     steps:
@@ -31,10 +31,14 @@ jobs:
       - run:
           name: Wait for Docker Daemon
           command: |
-             # CircleCI machine executors can sometimes start the job before dockerd finishes booting
-             for i in {1..10}; do
-               docker info >/dev/null 2>&1 && break || sleep 1;
-             done
+            echo "Waiting for Docker daemon to start..."
+            for i in {1..30}; do
+              docker info >/dev/null 2>&1 && exit 0
+              sleep 1
+            done
+            echo "Failed to connect to Docker daemon. Logs:"
+            sudo journalctl -u docker.service --no-pager | tail -n 50
+            exit 1
 
       - run:
           name: Set up QEMU for multi-arch
