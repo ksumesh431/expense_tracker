@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+
+# Build output (will be produced inside the container)
+dist
+
+# Version control
+.git
+.gitignore
+
+# Editor / IDE
+.vscode
+.idea
+*.sw?
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local env files (secrets injected via build args instead)
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Docs & artifacts
+README.md
+supabase_schema.sql
