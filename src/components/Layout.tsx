@@ -76,6 +76,7 @@ export default function Layout({ year, onYearChange }: LayoutProps) {
                 <button
                     onClick={() => setCollapsed(!collapsed)}
                     className="flex items-center justify-center h-9 border-t border-border text-text-muted hover:text-text-primary transition-colors"
+                    aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
                     {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                 </button>
