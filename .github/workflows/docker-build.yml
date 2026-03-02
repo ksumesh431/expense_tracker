@@ -13,10 +13,15 @@
 
 name: Build & Push Docker Image
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch: # Manual trigger
+# TEMPORARILY DISABLED — using CircleCI instead
+# Uncomment the 'on:' block below to re-enable GitHub Actions
+#
+# on:
+#   push:
+#     branches: [main]
+#   workflow_dispatch:
+
+on: workflow_dispatch  # Manual-only until re-enabled
 
 env:
   IMAGE_NAME: expense-tracker
