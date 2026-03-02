@@ -3,7 +3,7 @@
 // ============================================================
 
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, CalendarDays, TableProperties, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, CalendarDays, TableProperties, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../lib/utils";
 import { CURRENT_YEAR } from "../lib/constants";
@@ -89,7 +89,17 @@ export default function Layout({ year, onYearChange }: LayoutProps) {
                     className="flex items-center justify-between px-6 h-[var(--topbar-height)] border-b border-border flex-shrink-0"
                     style={{ backgroundColor: "var(--color-bg-secondary)" }}
                 >
-                    <h1 className="text-lg font-semibold text-text-heading">Expense Tracker</h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-lg font-semibold text-text-heading">Expense Tracker</h1>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="p-1 rounded-md text-text-muted hover:text-accent hover:bg-bg-hover transition-colors"
+                            aria-label="Refresh page"
+                            title="Refresh data"
+                        >
+                            <RefreshCw size={14} />
+                        </button>
+                    </div>
 
                     {/* Year Selector */}
                     <div className="flex items-center gap-2">
