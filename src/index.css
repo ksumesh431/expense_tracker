@@ -86,8 +86,10 @@ body {
 /* ── Scrollbar ─────────────────────────────────────────────── */
 
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 0px;
+  /* Hide vertical scrollbar */
   height: 5px;
+  /* Keep horizontal scrollbar */
 }
 
 ::-webkit-scrollbar-track {
